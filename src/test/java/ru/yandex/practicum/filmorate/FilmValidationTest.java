@@ -52,4 +52,25 @@ public class FilmValidationTest {
 
         assertThrows(ValidationException.class, () -> controller.create(film));
     }
+
+    @Test
+    void shouldFailOnTooLongDescription() {
+        Film film = new Film();
+        film.setName("Film");
+        film.setDescription("a".repeat(201));
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(100);
+
+        assertThrows(ValidationException.class, () -> controller.create(film));
+    }
+
+    @Test
+    void shouldFailOnNullName() {
+        Film film = new Film();
+        film.setDescription("Description");
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(100);
+
+        assertThrows(Exception.class, () -> controller.create(film));
+    }
 }

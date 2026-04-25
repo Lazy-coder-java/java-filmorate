@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return ResponseEntity.badRequest().body(error);
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -32,9 +31,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleOther(Exception ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Ошибка: " + ex.getMessage());
-        return ResponseEntity.internalServerError().body(error);
+    public ResponseEntity<ErrorResponse> handleOther(Exception ex) {
+        return ResponseEntity.internalServerError()
+                .body(new ErrorResponse("Ошибка: " + ex.getMessage()));
     }
 }

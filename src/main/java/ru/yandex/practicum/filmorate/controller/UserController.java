@@ -41,16 +41,35 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
         }
 
-        validate(user);
+        User existing = users.get(user.getId());
 
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        if (user.getEmail() != null) {
+            if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+                throw new ValidationException("Некорректный email");
+            }
+            existing.setEmail(user.getEmail());
         }
 
-        users.put(user.getId(), user);
+        if (user.getLogin() != null) {
+            if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+                throw new ValidationException("Некорректный логин");
+            }
+            existing.setLogin(user.getLogin());
+        }
 
-        log.info("Обновлен пользователь: {}", user);
-        return user;
+        if (user.getName() != null) {
+            existing.setName(user.getName().isBlank() ? existing.getLogin() : user.getName());
+        }
+
+        if (user.getBirthday() != null) {
+            if (user.getBirthday().isAfter(LocalDate.now())) {
+                throw new ValidationException("Дата рождения не может быть в будущем");
+            }
+            existing.setBirthday(user.getBirthday());
+        }
+
+        log.info("Обновлен пользователь: {}", existing);
+        return existing;
     }
 
     @GetMapping

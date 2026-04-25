@@ -40,12 +40,38 @@ public class FilmController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм не найден");
         }
 
-        validate(film);
+        Film existing = films.get(film.getId());
 
-        films.put(film.getId(), film);
+        if (film.getName() != null) {
+            if (film.getName().isBlank()) {
+                throw new ValidationException("Название не может быть пустым");
+            }
+            existing.setName(film.getName());
+        }
 
-        log.info("Обновлен фильм: {}", film);
-        return film;
+        if (film.getDescription() != null) {
+            if (film.getDescription().length() > 200) {
+                throw new ValidationException("Описание слишком длинное");
+            }
+            existing.setDescription(film.getDescription());
+        }
+
+        if (film.getReleaseDate() != null) {
+            if (film.getReleaseDate().isBefore(MIN_DATE)) {
+                throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года");
+            }
+            existing.setReleaseDate(film.getReleaseDate());
+        }
+
+        if (film.getDuration() != null) {
+            if (film.getDuration() <= 0) {
+                throw new ValidationException("Длительность должна быть положительной");
+            }
+            existing.setDuration(film.getDuration());
+        }
+
+        log.info("Обновлен фильм: {}", existing);
+        return existing;
     }
 
     @GetMapping
