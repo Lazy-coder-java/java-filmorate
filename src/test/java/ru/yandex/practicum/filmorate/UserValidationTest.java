@@ -10,20 +10,14 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserValidationTest {
+class UserValidationTest {
 
-    private final InMemoryUserStorage userStorage =
-            new InMemoryUserStorage();
-
-    private final UserService userService =
-            new UserService(userStorage);
-
-    private final UserController controller =
-            new UserController(userStorage, userService);
+    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    private final UserService userService = new UserService(userStorage);
+    private final UserController controller = new UserController(userService);
 
     @Test
     void shouldCreateValidUser() {
-
         User user = new User();
         user.setEmail("test@mail.com");
         user.setLogin("login");
@@ -36,7 +30,6 @@ public class UserValidationTest {
 
     @Test
     void shouldReplaceEmptyNameWithLogin() {
-
         User user = new User();
         user.setEmail("test@mail.com");
         user.setLogin("login");

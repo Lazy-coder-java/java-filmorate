@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +19,6 @@ public class UserService {
     }
 
     public void addFriend(int id, int friendId) {
-
         User user = userStorage.getById(id);
         User friend = userStorage.getById(friendId);
 
@@ -27,7 +27,6 @@ public class UserService {
     }
 
     public void removeFriend(int id, int friendId) {
-
         User user = userStorage.getById(id);
         User friend = userStorage.getById(friendId);
 
@@ -36,7 +35,6 @@ public class UserService {
     }
 
     public List<User> getFriends(int id) {
-
         User user = userStorage.getById(id);
 
         return user.getFriends().stream()
@@ -45,7 +43,6 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
-
         User user = userStorage.getById(id);
         User otherUser = userStorage.getById(otherId);
 
@@ -56,5 +53,21 @@ public class UserService {
         return commonIds.stream()
                 .map(userStorage::getById)
                 .toList();
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User update(User user) {
+        return userStorage.update(user);
+    }
+
+    public Collection<User> getAll() {
+        return userStorage.getAll();
+    }
+
+    public User getById(int id) {
+        return userStorage.getById(id);
     }
 }

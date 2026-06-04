@@ -11,23 +11,15 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FilmValidationTest {
+class FilmValidationTest {
 
-    private final InMemoryFilmStorage filmStorage =
-            new InMemoryFilmStorage();
-
-    private final InMemoryUserStorage userStorage =
-            new InMemoryUserStorage();
-
-    private final FilmService filmService =
-            new FilmService(filmStorage, userStorage);
-
-    private final FilmController controller =
-            new FilmController(filmStorage, filmService);
+    private final InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
+    private final FilmService filmService = new FilmService(filmStorage, userStorage);
+    private final FilmController controller = new FilmController(filmService);
 
     @Test
     void shouldCreateValidFilm() {
-
         Film film = new Film();
         film.setName("Film");
         film.setDescription("Description");
