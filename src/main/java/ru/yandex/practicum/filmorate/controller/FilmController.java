@@ -25,7 +25,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
+    public Film update(@RequestBody Film film) {
         if (film.getId() == null) {
             throw new ValidationException("ID фильма обязателен для обновления");
         }

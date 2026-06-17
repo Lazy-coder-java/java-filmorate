@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User user) {
+    public User update(@RequestBody User user) {
         if (user.getId() == null) {
             throw new ValidationException("ID пользователя обязателен для обновления");
         }
