@@ -2,8 +2,11 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.validator.ReleaseDate;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -17,9 +20,12 @@ public class Film {
     private String description;
 
     @NotNull(message = "Дата релиза обязательна")
+    @ReleaseDate
     private LocalDate releaseDate;
 
     @NotNull(message = "Длительность обязательна")
     @Positive(message = "Длительность должна быть положительной")
     private Integer duration;
+
+    private Set<Integer> likes = new HashSet<>();
 }
