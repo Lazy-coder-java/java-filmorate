@@ -1,52 +1,54 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import ru.yandex.practicum.filmorate.service.FilmService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
+@Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private final FilmService filmService;
 
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
+    private final FilmService filmService;
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        java.time.LocalDate minDate = java.time.LocalDate.of(1895, 12, 28);
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(minDate)) {
-            throw new ru.yandex.practicum.filmorate.exception.ValidationException("Дата релиза не может быть раньше 1895 года");
-        }
         return filmService.create(film);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
+    public Film update(@RequestBody Film film) {
+        if (film.getId() == null) {
+            throw new ValidationException("ID фильма обязателен для обновления");
+        }
         return filmService.update(film);
     }
 
     @GetMapping
-    public List<Film> getAll() {
+    public Collection<Film> getAll() {
         return filmService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Film getById(@PathVariable Integer id) {
+    public Film getById(@PathVariable int id) {
         return filmService.getById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public void removeLike(@PathVariable int id, @PathVariable int userId) {
         filmService.removeLike(id, userId);
     }
 
