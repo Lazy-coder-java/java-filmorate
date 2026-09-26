@@ -1,9 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 
 @Data
 public class Film {
@@ -22,4 +26,8 @@ public class Film {
     @NotNull(message = "Длительность обязательна")
     @Positive(message = "Длительность должна быть положительной")
     private Integer duration;
+
+    private Mpa mpa;
+
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 }
