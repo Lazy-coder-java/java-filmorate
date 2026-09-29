@@ -1,43 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Collection;
 
 @Service
 public class FilmService {
-
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
 
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage, JdbcTemplate jdbcTemplate) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-    }
-
-    public void addLike(int filmId, int userId) {
-        Film film = filmStorage.getById(filmId);
-        userStorage.getById(userId);
-        film.getLikes().add(userId);
-    }
-
-    public void removeLike(int filmId, int userId) {
-        Film film = filmStorage.getById(filmId);
-        userStorage.getById(userId);
-        film.getLikes().remove(userId);
-    }
-
-    public List<Film> getPopular(int count) {
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(
-                        (Film f) -> f.getLikes().size()).reversed())
-                .limit(count)
-                .toList();
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Film create(Film film) {
@@ -48,11 +28,41 @@ public class FilmService {
         return filmStorage.update(film);
     }
 
-    public Collection<Film> getAll() {
+    public List<Film> getAll() {
         return filmStorage.getAll();
     }
 
-    public Film getById(int id) {
+    public Film getById(Integer id) {
         return filmStorage.getById(id);
+    }
+
+    public void addLike(Integer filmId, Integer userId) {
+        filmStorage.getById(filmId);
+        userStorage.getById(userId);
+        jdbcTemplate.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", filmId, userId);
+    }
+
+    public void removeLike(Integer filmId, Integer userId) {
+        filmStorage.getById(filmId);
+        userStorage.getById(userId);
+        jdbcTemplate.update("DELETE FROM likes WHERE film_id = ? AND user_id = ?", filmId, userId);
+    }
+
+    public List<Film> getPopular(int count) {
+        String sql = "SELECT f.id FROM films f LEFT JOIN likes l ON f.id = l.film_id " +
+                "GROUP BY f.id ORDER BY COUNT(l.user_id) DESC LIMIT ?";
+
+        List<Integer> popularIds = jdbcTemplate.queryForList(sql, Integer.class, count);
+        List<Film> allFilms = filmStorage.getAll();
+
+        List<Film> result = new java.util.ArrayList<>();
+        for (Integer id : popularIds) {
+            for (Film f : allFilms) {
+                if (f.getId().equals(id)) {
+                    result.add(f);
+                }
+            }
+        }
+        return result;
     }
 }

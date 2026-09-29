@@ -1,20 +1,37 @@
 package ru.yandex.practicum.filmorate;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserValidationTest {
+@SpringBootTest
+@AutoConfigureTestDatabase
+public class UserValidationTest {
 
-    private final InMemoryUserStorage userStorage = new InMemoryUserStorage();
-    private final UserService userService = new UserService(userStorage);
-    private final UserController controller = new UserController(userService);
+    @Autowired
+    private UserController controller;
+
+    private Validator validator;
+
+    @BeforeEach
+    void setUp() {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     @Test
     void shouldCreateValidUser() {
@@ -23,9 +40,22 @@ class UserValidationTest {
         user.setLogin("login");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        User created = controller.create(user);
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertTrue(violations.isEmpty());
 
+        User created = controller.create(user);
         assertNotNull(created.getId());
+    }
+
+    @Test
+    void shouldFailOnInvalidEmail() {
+        User user = new User();
+        user.setEmail("wrongEmail");
+        user.setLogin("login");
+        user.setBirthday(LocalDate.of(2000, 1, 1));
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -36,7 +66,6 @@ class UserValidationTest {
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
         User created = controller.create(user);
-
         assertEquals("login", created.getName());
     }
 }
